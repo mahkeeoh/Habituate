@@ -1,0 +1,17 @@
+PODS:
+  - Charts (3.0.1):
+    - Charts/Core (= 3.0.1)
+  - Charts/Core (3.0.1)
+  - MZTimerLabel (0.5.4)
+
+DEPENDENCIES:
+  - Charts (= 3.0.1)
+  - MZTimerLabel (= 0.5.4)
+
+SPEC CHECKSUMS:
+  Charts: 0e84f4418e87dad6a9edde221fba37ebb51d3ba7
+  MZTimerLabel: cd9bfb9304540ef2a9e163384fca9c978f0dbf83
+
+PODFILE CHECKSUM: c527288ac16d5ac97ffedf1e26d94a6bd7f2fa16
+
+COCOAPODS: 1.2.0
