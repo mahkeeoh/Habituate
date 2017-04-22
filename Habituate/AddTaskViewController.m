@@ -35,11 +35,11 @@
 
 @implementation AddTaskViewController
 
-- (void)viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
-    [[self navigationController] setNavigationBarHidden:NO animated:YES];
-}
+//- (void)viewWillAppear:(BOOL)animated
+//{
+//    [super viewWillAppear:animated];
+//    [[self navigationController] setNavigationBarHidden:NO animated:YES];
+//}
 
 - (void)viewDidLoad
 {

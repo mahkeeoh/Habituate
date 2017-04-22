@@ -17,7 +17,7 @@ IB_DESIGNABLE
 @property (weak, nonatomic) IBOutlet UIButton *playButton;
 @property (weak, nonatomic) IBOutlet UILabel *nameText;
 @property (weak, nonatomic) IBOutlet UILabel *detailText;
-@property (weak, nonatomic) IBOutlet UIButton *detailButton;
+@property (weak, nonatomic) IBOutlet UILabel *detailLabel;
 
 
 @end

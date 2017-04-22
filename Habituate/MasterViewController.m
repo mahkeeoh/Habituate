@@ -17,6 +17,8 @@
 @interface MasterViewController ()
 
 @property NSArray *tasks;
+//- (void)detailClicked;
+
 @end
 
 @implementation MasterViewController
@@ -44,7 +46,7 @@
 
 - (void)viewwillAppear:(BOOL)animated
 {
-    [[self navigationController] setNavigationBarHidden:YES animated:YES];
+   // [[self navigationController] setNavigationBarHidden:YES animated:YES];
     self.clearsSelectionOnViewWillAppear = self.splitViewController.isCollapsed;
     [self.tableView reloadData];
     [super viewWillAppear:animated];
@@ -130,7 +132,9 @@
 {
     if ([[segue identifier] isEqualToString:@"showDetail"])
     {
+      //  NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
+        NSLog(@"Index Path: %li", (long)indexPath.row);
         TaskData *detail = self.tasks[indexPath.row];
         
         DayOfWork *lastRecordedDay = [detail.timeCompleted lastObject];
@@ -496,9 +500,14 @@
     return [[[TaskStore sharedStore]allTasks]count];
 }
 
-- (void)caretClicked
+//- (void)detailClicked:(id)sender
+//{
+//    [self performSegueWithIdentifier:@"showDetail" sender:sender];
+//}
+
+- (void)playButtonClicked:(UIButton *)sender
 {
-    [self performSegueWithIdentifier:@"showDetail" sender:nil];
+    [self buttonClicked:sender.tag];
 }
 
 #pragma mark - Edit Table View Cells
@@ -589,7 +598,8 @@
     
     cell.nameText.text = task.taskDataName;
     cell.playButton.tag = indexPath.row;
-    [cell.detailButton addTarget:self action:@selector(caretClicked) forControlEvents:UIControlEventTouchUpInside];
+    [cell.playButton addTarget:self action:@selector(playButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+    //[cell.detailButton addTarget:self action:@selector(detailClicked) forControlEvents:UIControlEventTouchUpInside];
     NSString *percentRemaining = [NSString stringWithFormat:@"%.0f%%", (100 - (task.remainingDuration/task.taskDataTime * 100))];
     
     if (!task.remainingDuration)
@@ -612,8 +622,9 @@
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-    int row = (int)indexPath.row;
-    [self buttonClicked:row];
+    //int row = (int)indexPath.row;
+    //[self detailClicked:row];
+    [self performSegueWithIdentifier:@"showDetail" sender:self];
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 

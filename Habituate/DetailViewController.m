@@ -30,31 +30,20 @@
         _detailItem = newDetailItem;
         
         self.pastFutureDates = 0;
-        
-        
-        [self configureView];
     }
 }
 
-- (void)configureView
-{
-    // Update the user interface for the detail item.
-    if (self.detailItem)
-    {
-        
-    }
-}
 
-- (void)viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
-    [[self navigationController] setNavigationBarHidden:NO animated:YES];
-}
-- (void)viewWillDisappear:(BOOL)animated
-{
-    [super viewWillDisappear:animated];
-    [[self navigationController] setNavigationBarHidden:YES animated:YES];
-}
+//- (void)viewWillAppear:(BOOL)animated
+//{
+//    [super viewWillAppear:animated];
+//    [[self navigationController] setNavigationBarHidden:NO animated:YES];
+//}
+//- (void)viewWillDisappear:(BOOL)animated
+//{
+//    [super viewWillDisappear:animated];
+//    [[self navigationController] setNavigationBarHidden:YES animated:YES];
+//}
 
 
 
@@ -65,7 +54,7 @@
     // Setup basic chart information
     self.leftAxis = nil;
     self.lineChart.delegate = self;
-    self.lineChart.descriptionText = @"";
+    self.lineChart.chartDescription = nil;
     [self.lineChart.legend setEnabled:NO];
     self.lineChart.noDataText = @"You need to provide data for the chart.";
     self.lineChart.dragEnabled = YES;
@@ -76,18 +65,7 @@
     self.title = self.detailItem.taskDataName;
     
     self.graphTitle.text = self.detailItem.taskDataName;
-    
-    // X axis formatting
-    self.xAxis = self.lineChart.xAxis;
-    self.xAxis.drawGridLinesEnabled = false;
-    self.xAxis.labelFont = [UIFont systemFontOfSize:12];
-    self.xAxis.axisLineColor = [UIColor whiteColor];
-    self.xAxis.labelTextColor = [UIColor whiteColor];
-    self.xAxis.granularityEnabled = YES;
-    self.xAxis.axisMinimum = 0;
-    self.xAxis.granularity = 1;
-    self.xAxis.decimals = 0;
-    [self.xAxis setLabelPosition:XAxisLabelPositionBottom];
+
     
     ChartLimitLine *goalLine;
     self.xAxisValue = [[NSMutableArray alloc]init];
@@ -160,15 +138,35 @@
         }
     }
     
+    
+    // Format x axis
+    self.xAxis = self.lineChart.xAxis;
+    self.xAxis.drawGridLinesEnabled = false;
+    self.xAxis.labelFont = [UIFont systemFontOfSize:12];
+    self.xAxis.axisLineColor = [UIColor whiteColor];
+    self.xAxis.labelTextColor = [UIColor whiteColor];
+    self.xAxis.granularityEnabled = YES;
+    self.xAxis.axisMinValue = 0;
+    self.xAxis.axisMaxValue = self.xAxisValue.count - 1;
+    
+    NSLog(@"axis max value:%f, axis min value:%f, axisvalue.count: %lu", self.xAxis.axisMaxValue, self.xAxis.axisMinValue, (unsigned long)self.xAxisValue.count);
+    
+    
+    self.xAxis.granularity = 1.0;
+    //self.xAxis.decimals = 0;
+    self.xAxis.valueFormatter = self;
+    [self.xAxis setLabelPosition:XAxisLabelPositionBottom];
+
+    
     // Format y axis
     self.leftAxis = self.lineChart.leftAxis;
     self.leftAxis.labelTextColor = [UIColor whiteColor];
-    [self.leftAxis setGranularity:1];
+    self.leftAxis.granularity = 1.0;
     self.leftAxis.labelFont = [UIFont systemFontOfSize:12];
     self.leftAxis.axisLineColor = [UIColor whiteColor];
     self.leftAxis.drawAxisLineEnabled = YES;
     self.leftAxis.drawGridLinesEnabled = NO;
-    [self.leftAxis setAxisMinValue:0];
+    self.leftAxis.axisMinimum = 0.0;
     goalLine.lineWidth = 1.0;
     goalLine.valueTextColor = [UIColor whiteColor];
     goalLine.lineColor = [UIColor whiteColor];
@@ -176,22 +174,22 @@
     [self.leftAxis addLimitLine:goalLine];
     NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
     formatter.maximumFractionDigits = 1;
-   // [self.leftAxis setValueFormatter:formatter];
     self.leftAxis.valueFormatter = [[ChartDefaultAxisValueFormatter alloc] initWithFormatter:formatter];
     
-    [self setChartXvalue:self.xAxisValue Yvalue:nil];
+
     
     
-    [self configureView];
-    
+    [self setChartData];
 }
+
+
 
 - (void)popController
 {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (void)setChartXvalue:(NSArray *)Xvalue Yvalue:(NSArray *)Yvalue
+- (void)setChartData
 {
     
     // For daily/weekly tasks, find first day of current week (sunday). Start for loop of that day and continue through
@@ -211,7 +209,7 @@
         daysToSubtract = [todayWorkObject.dayComponent weekday] + self.pastFutureDates;
     }
     
-    for (int i = 0; i < Xvalue.count; i++)
+    for (int i = 0; i < self.xAxisValue.count; i++)
     {
         
         // get first day of current week and see if there is an object for that
@@ -230,12 +228,16 @@
                 self.maxY = minutesCompleted;
             }
         }
-        [self stringForValue:i axis:self.xAxis];
+        else
+        {
+            //[Yval addObject:[[ChartDataEntry alloc] ini]
+           //  [Yval addObject:[[ChartDataEntry alloc] initWithX:i y:5]];
+        }
+        
+
     }
     
-    
-    self.xAxis.valueFormatter = self;
-    self.lineChart.xAxis.valueFormatter = self.xAxis.valueFormatter;
+ //   self.lineChart.xAxis.valueFormatter = self.xAxis.valueFormatter;
     self.leftAxis.axisMaxValue = (self.maxY + 5);
     
    // LineChartDataSet *set1 = [[LineChartDataSet alloc]initWithYVals:Yval label:@""];

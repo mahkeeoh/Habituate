@@ -25,12 +25,6 @@
 @property ChartYAxis *leftAxis;
 @property int maxY;
 
-
-
-- (void)setChartXvalue:(NSArray *)Xvalue
-                Yvalue:(NSArray *)Yvalue;
-
-
 - (IBAction)backButtonClicked:(id)sender;
 - (IBAction)forwardButtonClicked:(id)sender;
 - (void)popController;

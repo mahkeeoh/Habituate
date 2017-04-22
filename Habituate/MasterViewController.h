@@ -33,7 +33,6 @@
 - (void)applicationWillTerminate;
 - (void)applicationEnteringBackground;
 - (void)applicationEnteringForeground;
-- (void)caretClicked;
 
 @end
 
