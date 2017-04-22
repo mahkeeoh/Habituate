@@ -283,7 +283,7 @@
                         axis:(ChartAxisBase * _Nullable)axis
 {
    // return self.xAxisValue[(int)value %self.xAxisValue.count];
-    return self.xAxisValue[(int)value];
+    return self.xAxisValue[(int)value - 1];
 }
 
 // allow user to go back/forward by time frame (week).
