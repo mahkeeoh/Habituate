@@ -15,6 +15,21 @@
 @interface DetailViewController () <ChartViewDelegate, IChartAxisValueFormatter>
 
 @property (weak, nonatomic) IBOutlet LineChartView *lineChart;
+@property (nonatomic) ChartXAxis *xAxis;
+@property (nonatomic) NSMutableArray *xAxisValue;
+@property (nonatomic) long pastFutureDates;
+@property (weak, nonatomic) IBOutlet UIButton *backButton;
+@property (weak, nonatomic) IBOutlet UIButton *forwardButton;
+@property (weak, nonatomic) IBOutlet UILabel *graphTitle;
+
+@property ChartYAxis *leftAxis;
+@property int maxY;
+
+- (IBAction)backButtonClicked:(id)sender;
+- (IBAction)forwardButtonClicked:(id)sender;
+- (void)popController;
+
+
 
 
 @end
@@ -220,62 +235,57 @@
         {
             DayOfWork *currentWorkObject = self.detailItem.timeCompleted[arrayIndex];
             double minutesCompleted = currentWorkObject.dayTimeCompleted / 60;
-          //  [Yval addObject:[[ChartDataEntry alloc] initWithValue:minutesCompleted xIndex:i]];
             [Yval addObject:[[ChartDataEntry alloc] initWithX:i y:minutesCompleted]];
+            
             // Find max of array to set points above that
             if (minutesCompleted > self.maxY)
             {
                 self.maxY = minutesCompleted;
             }
         }
-        else
-        {
-            //[Yval addObject:[[ChartDataEntry alloc] ini]
-           //  [Yval addObject:[[ChartDataEntry alloc] initWithX:i y:5]];
-        }
-        
-
     }
     
- //   self.lineChart.xAxis.valueFormatter = self.xAxis.valueFormatter;
+    // Check after running through loop
     self.leftAxis.axisMaxValue = (self.maxY + 5);
     
-   // LineChartDataSet *set1 = [[LineChartDataSet alloc]initWithYVals:Yval label:@""];
-    LineChartDataSet *set1 = [[LineChartDataSet alloc]initWithValues:Yval];
-    [set1 setAxisDependency:AxisDependencyLeft];
-    [set1 setValueTextColor:[UIColor whiteColor]];
-    [set1 setDrawValuesEnabled:YES];
-    [set1 setColor:[UIColor whiteColor]];
-    [set1 setCircleColor:[UIColor colorWithRed:.29804 green:.99 blue:.3922 alpha:1]];
-    [set1 setCircleRadius:8.0];
-    [set1 setHighlightColor:[UIColor whiteColor]];
-    [set1 setDrawFilledEnabled:YES];
     
-    
-    
-    // Set gradient fade below graph
-    NSArray *gradientColors = @[
-                                (id)[ChartColorTemplates colorFromString:@"#00ffffff"].CGColor,
-                                (id)[ChartColorTemplates colorFromString:@"#6Bffffff"].CGColor
-                                ];
-    CGGradientRef gradient = CGGradientCreateWithColors(nil, (CFArrayRef)gradientColors, nil);
-    
-    set1.fillAlpha = 1.f;
-    set1.fill = [ChartFill fillWithLinearGradient:gradient angle:90.f];
-    
-//    NSMutableArray *dataSets = [[NSMutableArray alloc] init];
-//    [dataSets addObject:set1];
-    
-    
-   // LineChartData *data = [[LineChartData alloc]initWithXVals:Xvalue dataSets:dataSets];
-   // LineChartData *data = [[LineChartData alloc]initWithDataSets:dataSets];
-    LineChartData *data = [[LineChartData alloc]initWithDataSet:set1];
-    [data setValueTextColor:[UIColor whiteColor]];
-    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-    formatter.maximumFractionDigits = 1;
-  //  [data setValueFormatter:formatter];
-    self.lineChart.data = data;
-    
+    if (Yval.count != 0)
+    {
+        LineChartDataSet *set1 = [[LineChartDataSet alloc]initWithValues:Yval];
+        [set1 setAxisDependency:AxisDependencyLeft];
+        [set1 setValueTextColor:[UIColor whiteColor]];
+        [set1 setDrawValuesEnabled:YES];
+        [set1 setColor:[UIColor whiteColor]];
+        [set1 setCircleColor:[UIColor colorWithRed:.29804 green:.99 blue:.3922 alpha:1]];
+        [set1 setCircleRadius:8.0];
+        [set1 setHighlightColor:[UIColor whiteColor]];
+        [set1 setDrawFilledEnabled:YES];
+        
+        
+        
+        // Set gradient fade below graph
+        NSArray *gradientColors = @[
+                                    (id)[ChartColorTemplates colorFromString:@"#00ffffff"].CGColor,
+                                    (id)[ChartColorTemplates colorFromString:@"#6Bffffff"].CGColor
+                                    ];
+        CGGradientRef gradient = CGGradientCreateWithColors(nil, (CFArrayRef)gradientColors, nil);
+        
+        set1.fillAlpha = 1.f;
+        set1.fill = [ChartFill fillWithLinearGradient:gradient angle:90.f];
+        
+
+        LineChartData *data = [[LineChartData alloc]initWithDataSet:set1];
+        [data setValueTextColor:[UIColor whiteColor]];
+       // NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+       // formatter.maximumFractionDigits = 1;
+      //  [data setValueFormatter:formatter];
+        self.lineChart.data = data;
+    }
+    else
+    {
+        LineChartData *data = [[LineChartData alloc]init];
+        self.lineChart.data = data;
+    }
     
 }
 

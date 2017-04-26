@@ -17,46 +17,59 @@
 @interface MasterViewController ()
 
 @property NSArray *tasks;
-//- (void)detailClicked;
+@property (strong, nonatomic) DetailViewController *detailViewController;
+@property CABasicAnimation *animationViewPosition;
+@property CircleView *topCircle;
+@property NSTimeInterval loadStartTime;
+@property NSTimeInterval loadEndTime;
+@property NSDate *currentDate;
+@property NSDateComponents *currentComponents;
+@property NSTimer *timer;
+
+- (void)recordSaveLoadEnd:(CFTimeInterval)endTime start:(CFTimeInterval)startTime;
+- (void)buttonClicked:(int)row;
+- (void)updatePercent:(NSTimer*)sender;
+- (void)addBlankDays:(DayOfWork *)lastRecordedDay fromData:(TaskData *)data;
+- (void)timerClicked;
+- (void)saveCircle;
+- (void)loadCircle;
+- (void)applicationWillTerminate;
+- (void)applicationEnteringBackground;
+- (void)applicationEnteringForeground;
+
 
 @end
 
 @implementation MasterViewController
 
+
+#pragma mark - Leaving/Entering View
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    self.navigationItem.backBarButtonItem.title = @"Back";
-    self.detailViewController = (DetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     
     // Only check for date when initially opening app (If user is still using the app when it goes past midnight, it will count for original day
     self.currentDate= [NSDate date];
     self.currentComponents = [[NSCalendar currentCalendar] components:(NSCalendarUnitYearForWeekOfYear | NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekOfYear | NSCalendarUnitWeekday | NSCalendarUnitDay) fromDate:self.currentDate];
     
+    // Prepare notifications for leaving app
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationEnteringBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationEnteringForeground) name:UIApplicationWillEnterForegroundNotification object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate) name:UIApplicationWillTerminateNotification object:nil];
-    
-    
-    
 }
 
 - (void)viewwillAppear:(BOOL)animated
 {
-   // [[self navigationController] setNavigationBarHidden:YES animated:YES];
-    self.clearsSelectionOnViewWillAppear = self.splitViewController.isCollapsed;
-    [self.tableView reloadData];
     [super viewWillAppear:animated];
+    [self.tableView reloadData];
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    
-    
     if (self.topCircle.duration != 0)
     {
         [self loadCircle];
@@ -66,17 +79,15 @@
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
+    
+    // Check if animation was running or circle was full
     if (self.topCircle.animation || (self.topCircle.duration < 0))
     {
         // So that when circle view returns, it won't look filled for a brief moment
-        [self.topCircle.greenCircle setStrokeEnd:0];
-        
+        self.topCircle.greenCircle.strokeEnd = 0.0;
         [self saveCircle];
     }
-    
 }
-
-#pragma mark - Leaving View
 
 - (void)applicationEnteringForeground
 {
@@ -101,7 +112,6 @@
     [[TaskStore sharedStore] saveChanges];
 }
 
-
 - (void)applicationWillTerminate
 {
     TaskData *currentTask = self.tasks[self.topCircle.buttonTag];
@@ -113,41 +123,21 @@
     [[TaskStore sharedStore] saveChanges];
 }
 
-
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
 #pragma mark - Segues
-
-- (void)insertNewObject:(id)sender
-{
-    [self performSegueWithIdentifier:@"addTask" sender:sender];
-}
-
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if ([[segue identifier] isEqualToString:@"showDetail"])
     {
-      //  NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        NSLog(@"Index Path: %li", (long)indexPath.row);
         TaskData *detail = self.tasks[indexPath.row];
-        
         DayOfWork *lastRecordedDay = [detail.timeCompleted lastObject];
-        
         [self addBlankDays:lastRecordedDay fromData:detail];
         
         DetailViewController *controller = [segue destinationViewController];
-        [controller setDetailItem:detail];
-        [controller setCurrentDate:self.currentDate];
-        [controller setCurrentDateComponents:self.currentComponents];
-       // controller.navigationItem.leftBarButtonItem = self.splitViewController.displayModeButtonItem;
-        controller.navigationItem.leftItemsSupplementBackButton = YES;
-        //self.splitViewController.displayModeButtonItem.tintColor = [UIColor colorWithRed:.29804 green:.8510 blue:.3922 alpha:1];
+        controller.detailItem = detail;
+        controller.currentDate = self.currentDate;
+        controller.currentDateComponents = self.currentComponents;
     }
 }
 
@@ -168,15 +158,6 @@
         CGRect circRect = CGRectMake(0, 0, width, 275);
         self.topCircle = [[CircleView alloc]initWithFrame:circRect];
         self.topCircle.delegate = self;
-        
-        // Make add button
-        CGRect addButtonRect = CGRectMake((width - 50), 0, 50, 50);
-        UIButton *addButton = [[UIButton alloc] initWithFrame:addButtonRect];
-        [addButton setTitle:@"+" forState:UIControlStateNormal];
-        addButton.titleLabel.font = [UIFont systemFontOfSize:50];
-        [addButton setTitleColor:[UIColor colorWithRed:.29804 green:.8510 blue:.3922 alpha:1] forState:UIControlStateNormal];
-        [addButton addTarget:self action:@selector(insertNewObject:) forControlEvents:UIControlEventTouchUpInside];
-        [self.topCircle addSubview:addButton];
         
         // Make timer clickable
         UITapGestureRecognizer *clickable = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(timerClicked)];
@@ -199,7 +180,6 @@
 {
     TaskData *task = self.tasks[row];
     self.topCircle.tagNumber = (row + 1);
-    
     self.topCircle.nameLabel.text = @"Daily Goal";
     
     if (task.isGoodHabit)
@@ -223,7 +203,8 @@
     self.topCircle.fromValue = task.resumeFromValue;
     
     // Set task text
-    self.topCircle.taskLabel.text = task.taskDataName;
+    //self.topCircle.taskLabel.text = task.taskDataName;
+    self.title = task.taskDataName;
     
     // If new task is clicked
     if (!(self.topCircle.buttonTag == row))
@@ -500,16 +481,6 @@
     return [[[TaskStore sharedStore]allTasks]count];
 }
 
-//- (void)detailClicked:(id)sender
-//{
-//    [self performSegueWithIdentifier:@"showDetail" sender:sender];
-//}
-
-- (void)playButtonClicked:(UIButton *)sender
-{
-    [self buttonClicked:sender.tag];
-}
-
 #pragma mark - Edit Table View Cells
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -524,106 +495,25 @@
     
     self.tasks = [[TaskStore sharedStore]allTasks];
     TaskData *task = self.tasks[indexPath.row];
-    
+    [cell cellSetup:task withDate:self.currentDate andComponents:self.currentComponents];
     
     // In taskdata, add properties for date/component in order to keep track every day, therefore I can limit entering
     // into this switch to the first time of the day. This will also allow me to update daily time needed
     
     // Check to see if new day/week/month has begun, reset everything and set new start date/components
-    switch (task.taskDataType)
-    {
-        case 0:
-        {
-            task.daysRemaining = 1;
-            cell.detailText.text =[NSString stringWithFormat:@"Daily. %.01f minutes remaining today", ((task.remainingDuration / task.daysRemaining) / 60)];
-            if (([task.startingComponents day]!= [self.currentComponents day]))
-            {
-                [task resetComponents];
-                task.daysRemaining = 1;
-                task.startingDate = self.currentDate;
-                task.startingComponents = self.currentComponents;
-            }
-            break;
-        }
-        case 1:
-        {
-            
-            
-            // 8 - days gives remaining day (7 for sunday)
-            task.daysRemaining = 8 - [self.currentComponents weekday];
-            cell.detailText.text = [NSString  stringWithFormat:@"Weekly. %.01f minutes remaining today", ((task.remainingDuration / task.daysRemaining) / 60)];
-            
-            
-            // Reset time, and always set start date to the sunday of that week
-            if (([task.startingComponents weekOfYear]!= [self.currentComponents weekOfYear]))
-            {
-                [task resetComponents];
-                [self.currentComponents setWeekday:1];
-                task.startingDate = [[NSCalendar currentCalendar] dateFromComponents:self.currentComponents];
-                task.startingComponents = self.currentComponents;
-                self.currentComponents = [[NSCalendar currentCalendar] components:(NSCalendarUnitYearForWeekOfYear | NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekOfYear | NSCalendarUnitWeekday | NSCalendarUnitDay) fromDate:self.currentDate];
-                
-            }
-            break;
-        }
-        case 2:
-        {
-            // Calculate number of days in current month
-            NSRange rng = [[NSCalendar currentCalendar] rangeOfUnit:NSCalendarUnitDay inUnit:NSCalendarUnitMonth forDate:self.currentDate];
-            NSUInteger numberOfDaysInMonth = rng.length;
-            
-            {
-                task.daysRemaining = numberOfDaysInMonth - [self.currentComponents day] + 1;
-                cell.detailText.text = [NSString  stringWithFormat:@"Monthly. %.01f minutes remaining today", ((task.remainingDuration / task.daysRemaining) / 60)];
-            }
-            
-            if (([task.startingComponents month]!= [self.currentComponents month]))
-            {
-                [task resetComponents];
-                [self.currentComponents setDay:1];
-                task.startingDate = [[NSCalendar currentCalendar] dateFromComponents:self.currentComponents];
-                task.startingComponents = self.currentComponents;
-                self.currentComponents = [[NSCalendar currentCalendar] components:(NSCalendarUnitYearForWeekOfYear | NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekOfYear | NSCalendarUnitWeekday | NSCalendarUnitDay) fromDate:self.currentDate];
-            }
-            break;
-        }
-    }
-    if (([task.currentComponents day]!= [self.currentComponents day]))
-    {
-        task.dailyRemainingDuration = (task.remainingDuration / task.daysRemaining);
-        task.stackingTime = 0;
-        task.resumeFromValue = 0;
-        task.currentComponents = self.currentComponents;
-    }
-    
-    cell.nameText.text = task.taskDataName;
-    cell.playButton.tag = indexPath.row;
+
     [cell.playButton addTarget:self action:@selector(playButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
-    //[cell.detailButton addTarget:self action:@selector(detailClicked) forControlEvents:UIControlEventTouchUpInside];
-    NSString *percentRemaining = [NSString stringWithFormat:@"%.0f%%", (100 - (task.remainingDuration/task.taskDataTime * 100))];
-    
-    if (!task.remainingDuration)
-    {
-        percentRemaining = [NSString stringWithFormat:@"0%%"];
-    }
-    [cell.playButton setTitle:percentRemaining forState:UIControlStateNormal];
-    
-    if (task.isGoodHabit)
-    {
-        [cell.playButton setTitleColor:[UIColor colorWithRed:.29804 green:.8510 blue:.3922 alpha:1] forState:UIControlStateNormal];
-    }
-    else
-    {
-        [cell.playButton setTitleColor:[UIColor colorWithRed:1 green:(59/255) blue:(48/255) alpha:1] forState:UIControlStateNormal];
-    }
-    
+    cell.playButton.tag = indexPath.row;
     return cell;
+}
+
+- (void)playButtonClicked:(UIButton *)sender
+{
+    [self buttonClicked:sender.tag];
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-    //int row = (int)indexPath.row;
-    //[self detailClicked:row];
     [self performSegueWithIdentifier:@"showDetail" sender:self];
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
@@ -631,7 +521,6 @@
 #pragma mark - Edit Table View
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    // Return NO if you do not want the specified item to be editable.
     return YES;
 }
 
@@ -679,11 +568,6 @@
                                                         userInfo:@(tag)
                                                          repeats:YES];
         }
-        
-    }
-    else if (editingStyle == UITableViewCellEditingStyleInsert)
-    {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
     }
 }
 

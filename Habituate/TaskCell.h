@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "CircleView.h"
+#import "TaskData.h"
 
 IB_DESIGNABLE
 
@@ -18,6 +19,8 @@ IB_DESIGNABLE
 @property (weak, nonatomic) IBOutlet UILabel *nameText;
 @property (weak, nonatomic) IBOutlet UILabel *detailText;
 @property (weak, nonatomic) IBOutlet UILabel *detailLabel;
+
+- (void)cellSetup:(TaskData *)task withDate:(NSDate *)date andComponents:(NSDateComponents *)components;
 
 
 @end

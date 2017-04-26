@@ -22,26 +22,24 @@
 {
     // Create circle parameters
     self.circlePath = [[UIBezierPath alloc]init];
-    CGPoint center;
-    center.x = self.frame.size.width / 2.0;
-    center.y = self.frame.size.height / 2.0;
     float radius = (MIN(self.frame.size.width, self.frame.size.height)/2.0) - 20;
-    [self.circlePath addArcWithCenter:center radius:radius startAngle:-M_PI / 2.0 endAngle:M_PI * 3.0/2.0 clockwise:YES];
+    [self.circlePath addArcWithCenter:self.center radius:radius startAngle:-M_PI / 2.0 endAngle:M_PI * 3.0/2.0 clockwise:YES];
     
     // Create countdown timer parameters
-    CGRect timerRect = CGRectMake(center.x - (radius - 15), center.y - ((radius - 40) / 4), 2 * radius - 30, (radius - 30)/2);
-    self.timerLabel = [[UILabel alloc] initWithFrame:timerRect];
-    //timerLabel.backgroundColor = [UIColor redColor];
+    CGRect timerRect = CGRectMake(0, 0, 2 * radius - 30, (radius - 30)/2);
+    self.timerLabel = [[UILabel alloc]initWithFrame:timerRect];
+    self.timerLabel.center = self.center;
+
     self.countdownTimer = [[MZTimerLabel alloc]initWithLabel:self.timerLabel andTimerType:MZTimerLabelTypeTimer];
     self.timerLabel.font = [UIFont systemFontOfSize:48.0f];
-    [self.timerLabel setTextColor:[UIColor colorWithRed:.5568 green:.5568 blue:.5765 alpha:.65]];
+    self.timerLabel.textColor = [UIColor colorWithRed:.5568 green:.5568 blue:.5765 alpha:.65];
     self.timerLabel.textAlignment = NSTextAlignmentCenter;
     //timerLabel.adjustsFontSizeToFitWidth = YES;
     [self.countdownTimer setCountDownTime:0];
     self.countdownTimer.timeFormat = @"HH:mm:ss";
     [self addSubview:self.timerLabel];
     
-    CGRect nameRect = CGRectMake(center.x - (radius - 15), center.y + ((radius - 30) / 4), 2 * radius - 30, (radius - 30)/2);
+    CGRect nameRect = CGRectMake(self.center.x - (radius - 15), self.center.y + ((radius - 30) / 4), 2 * radius - 30, (radius - 30)/2);
     self.nameLabel = [[UILabel alloc]initWithFrame:nameRect];
     self.nameLabel.textAlignment = NSTextAlignmentCenter;
     self.nameLabel.font = [UIFont systemFontOfSize:20.0f];

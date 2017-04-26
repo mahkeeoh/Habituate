@@ -15,7 +15,8 @@
 @property (weak, nonatomic) IBOutlet UITextField *addName;
 @property (weak, nonatomic) IBOutlet UIButton *goalButton;
 @property (weak, nonatomic) IBOutlet UIButton *limitButton;
-@property (strong, nonatomic)  UIPickerView *dateTimePicker;
+//@property (strong, nonatomic)  UIPickerView *dateTimePicker;
+@property (weak, nonatomic) IBOutlet UIPickerView *dateTimePicker;
 @property (nonatomic) NSMutableArray *stringInt;
 @property (nonatomic) NSArray *timeArray;
 @property (nonatomic) NSArray *dayArray;
@@ -55,9 +56,9 @@
     self.timeArray = @[ @"minute(s)", @"hour(s)"];
     self.dayArray = @[ @"per day", @"per week", @"per month"];
     
-    CGFloat width = [UIScreen mainScreen].bounds.size.width;
-    CGRect pickerRect = CGRectMake(0, 230, width, 216);
-    self.dateTimePicker = [[UIPickerView alloc]initWithFrame:pickerRect];
+    //CGFloat width = [UIScreen mainScreen].bounds.size.width;
+    //CGRect pickerRect = CGRectMake(0, 230, width, 216);
+    //self.dateTimePicker = [[UIPickerView alloc]initWithFrame:pickerRect];
     // self.dateTimePicker.backgroundColor = [UIColor whiteColor];
     
     /*  NSLayoutConstraint *topConstraint = [NSLayoutConstraint
@@ -88,7 +89,7 @@
      [self.view addConstraint:topConstraint];
      [self.view addConstraint:leftConstraint];
      [self.view addConstraint:rightConstraint];*/
-    [self.view addSubview:self.dateTimePicker];
+   // [self.view addSubview:self.dateTimePicker];
     [self.dateTimePicker setDataSource:self];
     [self.dateTimePicker setDelegate:self];
     
