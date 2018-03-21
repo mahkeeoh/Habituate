@@ -29,9 +29,9 @@
     CGRect timerRect = CGRectMake(0, 0, 2 * radius - 30, (radius - 30)/2);
     self.timerLabel = [[UILabel alloc]initWithFrame:timerRect];
     self.timerLabel.center = self.center;
-
+    
     self.countdownTimer = [[MZTimerLabel alloc]initWithLabel:self.timerLabel andTimerType:MZTimerLabelTypeTimer];
-    self.timerLabel.font = [UIFont systemFontOfSize:48.0f];
+    self.timerLabel.font = [UIFont systemFontOfSize:60.0f];
     self.timerLabel.textColor = [UIColor colorWithRed:.5568 green:.5568 blue:.5765 alpha:.65];
     self.timerLabel.textAlignment = NSTextAlignmentCenter;
     //timerLabel.adjustsFontSizeToFitWidth = YES;
@@ -42,7 +42,7 @@
     CGRect nameRect = CGRectMake(self.center.x - (radius - 15), self.center.y + ((radius - 30) / 4), 2 * radius - 30, (radius - 30)/2);
     self.nameLabel = [[UILabel alloc]initWithFrame:nameRect];
     self.nameLabel.textAlignment = NSTextAlignmentCenter;
-    self.nameLabel.font = [UIFont systemFontOfSize:20.0f];
+    self.nameLabel.font = [UIFont systemFontOfSize:25.0f];
     self.nameLabel.textColor = [UIColor colorWithRed:.29804 green:.8510 blue:.3922 alpha:1];
     [self addSubview:self.nameLabel];
     
@@ -93,18 +93,14 @@
 
 - (void)animateCircle
 {
-    // Gather date information for storing purposes
-    //self.startDate = [NSDate date];
-    //self.components = [[NSCalendar currentCalendar] components:(NSCalendarUnitYearForWeekOfYear | NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekOfYear | NSCalendarUnitWeekday | NSCalendarUnitDay) fromDate:self.startDate];
     
-    // Use this to calculate resume time when view disappears
-    // self.startTime = [self.greenCircle convertTime:CACurrentMediaTime() fromLayer:nil];
     
     // Set countdown timer
     if (self.countdownTimer.getCountDownTime)
     {
         [self.countdownTimer reset];
     }
+    
     self.countdownTimer.timerType = MZTimerLabelTypeTimer;
     [self.countdownTimer setCountDownTime:self.duration];
     
@@ -113,6 +109,7 @@
     self.animation = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
     self.animation.duration = self.duration;
     NSNumber *animFromValue = [NSNumber numberWithDouble:self.fromValue];
+    //    printf("fromValue: %f \n", (self.fromValue * 60));
     self.animation.fromValue = animFromValue;
     self.animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
     self.animation.delegate = self;
@@ -122,10 +119,6 @@
     
     // Initialize animation
     [self.greenCircle addAnimation:self.animation forKey:@"strokeEnd"];
-    
-    
-    // resume timer and update remaining time
-    // [self.countdownTimer setCountDownTime:self.duration];
     
     [self.countdownTimer start];
     

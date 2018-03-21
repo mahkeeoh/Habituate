@@ -14,7 +14,8 @@
                  initialTime:(double)initialTime
                    finalTime:(double)finalTime
              initialDuration:(double)initialDuration
-                        type:(long)type;
+                        type:(long)type
+               daysRemaining:(double)daysRemaining;
 {
     self = [super init];
     if (self)
@@ -23,6 +24,7 @@
         _taskDataTime = initialTime;
         _taskFinalTime = finalTime;
         _remainingDuration = initialDuration;
+        _dailyRemainingDuration = initialDuration / daysRemaining;
         _taskDataType = type;
         _timeCompleted = [[NSMutableArray alloc]init];
         _startingDate = [NSDate date];
@@ -83,4 +85,3 @@
     self.resumeFromValue = 0;
 }
 @end
-

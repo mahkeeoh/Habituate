@@ -89,7 +89,7 @@
      [self.view addConstraint:topConstraint];
      [self.view addConstraint:leftConstraint];
      [self.view addConstraint:rightConstraint];*/
-   // [self.view addSubview:self.dateTimePicker];
+    // [self.view addSubview:self.dateTimePicker];
     [self.dateTimePicker setDataSource:self];
     [self.dateTimePicker setDelegate:self];
     
@@ -234,14 +234,16 @@
     // Dynamically set initial goal time to offset for when it was created
     double remainingDuration;
     double initialTime;
+    double daysRemaining;
     if ([self.dateTimePicker selectedRowInComponent:2] == 0)
     {
+        daysRemaining = 1;
         remainingDuration = self.timeSecs;
         initialTime = self.timeSecs;
     }
     else if ([self.dateTimePicker selectedRowInComponent:2] == 1)
     {
-        double daysRemaining = 8 - [currentComponents weekday];
+        daysRemaining = 8 - [currentComponents weekday];
         remainingDuration = (self.timeSecs * (daysRemaining / 7));
         initialTime = (self.timeSecs * (daysRemaining / 7));
     }
@@ -249,22 +251,19 @@
     {
         NSRange rng = [[NSCalendar currentCalendar] rangeOfUnit:NSCalendarUnitDay inUnit:NSCalendarUnitMonth forDate:currentDate];
         double numberOfDaysInMonth = rng.length;
-        double daysRemaining = numberOfDaysInMonth - [currentComponents day] + 1;
+        daysRemaining = numberOfDaysInMonth - [currentComponents day] + 1;
         remainingDuration = (self.timeSecs * (daysRemaining / numberOfDaysInMonth));
         initialTime = (self.timeSecs * (daysRemaining / numberOfDaysInMonth));
     }
     
-    TaskData *newTask = [[TaskData alloc]initWithName:self.addName.text initialTime:initialTime finalTime:self.timeSecs initialDuration:remainingDuration type:[self.dateTimePicker selectedRowInComponent:2]];
+    TaskData *newTask = [[TaskData alloc] initWithName:self.addName.text initialTime:initialTime finalTime:self.timeSecs initialDuration:remainingDuration type:[self.dateTimePicker selectedRowInComponent:2] daysRemaining:daysRemaining];
     
     
     newTask.isGoodHabit = self.isGoal;
-    
-    
+    newTask.daysRemaining = daysRemaining;
     [newTask.timeCompleted addObject:currentDay];
-    
     [[TaskStore sharedStore] createTaskWithItem:newTask];
     [self performSegueWithIdentifier:@"unwindAdd" sender:sender];
-    //[self dismissViewControllerAnimated:YES completion:nil];
     return newTask;
 }
 
