@@ -31,7 +31,8 @@
                  initialTime:(double)initialTime
                    finalTime:(double)finalTime
              initialDuration:(double)initialDuration
-                        type:(long)type;
+                        type:(long)type
+               daysRemaining:(double)daysRemaining;
 
 - (void)resetComponents;
 

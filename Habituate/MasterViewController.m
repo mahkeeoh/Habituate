@@ -48,7 +48,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+    self.navigationController.navigationBar.translucent = NO;
     // Only check for date when initially opening app (If user is still using the app when it goes past midnight, it will count for original day
     self.currentDate= [NSDate date];
     self.currentComponents = [[NSCalendar currentCalendar] components:(NSCalendarUnitYearForWeekOfYear | NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekOfYear | NSCalendarUnitWeekday | NSCalendarUnitDay) fromDate:self.currentDate];
@@ -155,7 +155,7 @@
     {
         // Create circle
         CGFloat width = CGRectGetWidth(self.view.bounds);
-        CGRect circRect = CGRectMake(0, 0, width, 275);
+        CGRect circRect = CGRectMake(0, 0, width, 350);
         self.topCircle = [[CircleView alloc]initWithFrame:circRect];
         self.topCircle.delegate = self;
         
@@ -203,7 +203,6 @@
     self.topCircle.fromValue = task.resumeFromValue;
     
     // Set task text
-    //self.topCircle.taskLabel.text = task.taskDataName;
     self.title = task.taskDataName;
     
     // If new task is clicked
@@ -330,7 +329,6 @@
 - (void)saveCircle
 {
     
-    
     // Use two different timing methods to calculate time difference (due to the fact that in one situation, the layer time will reset
     TaskData *currentTask = self.tasks[self.topCircle.buttonTag];
     if (currentTask.isPlaying)
@@ -353,7 +351,6 @@
     {
         self.loadEndTime = [[NSDate date]timeIntervalSince1970];
         [self recordSaveLoadEnd:self.loadEndTime start:self.loadStartTime];
-        
         if (currentTask.dailyRemainingDuration > 0)
         {
             [self.topCircle didTapPlayPauseButton];
@@ -405,6 +402,8 @@
     
     // Calculation used to determine where to start animation
     task.resumeFromValue = (task.stackingTime / (task.dailyRemainingDuration + task.stackingTime));
+
+    printf("Daily remaining duration: %f \n", task.dailyRemainingDuration);
     
     
     // Set new values for CircleView
@@ -495,15 +494,130 @@
     
     self.tasks = [[TaskStore sharedStore]allTasks];
     TaskData *task = self.tasks[indexPath.row];
-    [cell cellSetup:task withDate:self.currentDate andComponents:self.currentComponents];
+    switch (task.taskDataType)
+    {
+        case 0:
+        {
+            task.daysRemaining = 1;
+            task.dailyRemainingDuration = (task.remainingDuration / task.daysRemaining);
+            if (task.dailyRemainingDuration > 0)
+            {
+                cell.detailText.text =[NSString stringWithFormat:@"Daily. %.01f minutes remaining today", ((task.dailyRemainingDuration / 60))];
+            }
+            else
+            {
+                cell.detailText.text =[NSString stringWithFormat:@"Daily. 0 minutes remaining today"];
+            }
+            if (([task.startingComponents day]!= [self.currentComponents day]))
+            {
+                [task resetComponents];
+                task.daysRemaining = 1;
+                task.startingDate = self.currentDate;
+                task.startingComponents = self.currentComponents;
+            }
+            break;
+        }
+        case 1:
+        {
+            
+            
+            // 8 - days gives remaining day (7 for sunday)
+            task.daysRemaining = 8 - [self.currentComponents weekday];
+            
+            // check to see if day is new before updating dailyremainingduration
+            DayOfWork *lastRecordedDay = [task.timeCompleted lastObject];
+            if (lastRecordedDay.dayComponent.day != self.currentComponents.day)
+            {
+                task.dailyRemainingDuration = (task.remainingDuration / task.daysRemaining);
+            }
+            if (task.dailyRemainingDuration > 0)
+            {
+                cell.detailText.text = [NSString  stringWithFormat:@"Weekly. %.01f minutes remaining today", ((task.dailyRemainingDuration / 60))];
+            }
+            else
+            {
+                cell.detailText.text = [NSString  stringWithFormat:@"Weekly. 0 minutes remaining today"];
+            }
+            
+            // Reset time, and always set start date to the sunday of that week
+            if (([task.startingComponents weekOfYear]!= [self.currentComponents weekOfYear]))
+            {
+                [task resetComponents];
+                [self.currentComponents setWeekday:1];
+                task.startingDate = [[NSCalendar currentCalendar] dateFromComponents:self.currentComponents];
+                task.startingComponents = self.currentComponents;
+                self.currentComponents = [[NSCalendar currentCalendar] components:(NSCalendarUnitYearForWeekOfYear | NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekOfYear | NSCalendarUnitWeekday | NSCalendarUnitDay) fromDate:self.currentDate];
+                
+            }
+            break;
+        }
+        case 2:
+        {
+            // Calculate number of days in current month
+            NSRange rng = [[NSCalendar currentCalendar] rangeOfUnit:NSCalendarUnitDay inUnit:NSCalendarUnitMonth forDate:self.currentDate];
+            NSUInteger numberOfDaysInMonth = rng.length;
+            
+            {
+                task.daysRemaining = numberOfDaysInMonth - [self.currentComponents day] + 1;
+                
+                // check to see if day is new before updating dailyremainingduration
+                DayOfWork *lastRecordedDay = [task.timeCompleted lastObject];
+                if (lastRecordedDay.dayComponent.day != self.currentComponents.day)
+                {
+                    task.dailyRemainingDuration = (task.remainingDuration / task.daysRemaining);
+                }
+                if (task.dailyRemainingDuration > 0)
+                {
+                    cell.detailText.text = [NSString  stringWithFormat:@"Monthly. %.01f minutes remaining today", ((task.dailyRemainingDuration / 60))];
+                }
+                else
+                {
+                    cell.detailText.text = [NSString  stringWithFormat:@"Monthly. 0 minutes remaining today"];
+                }
+            }
+            
+            if (([task.startingComponents month]!= [self.currentComponents month]))
+            {
+                [task resetComponents];
+                [self.currentComponents setDay:1];
+                task.startingDate = [[NSCalendar currentCalendar] dateFromComponents:self.currentComponents];
+                task.startingComponents = self.currentComponents;
+                self.currentComponents = [[NSCalendar currentCalendar] components:(NSCalendarUnitYearForWeekOfYear | NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekOfYear | NSCalendarUnitWeekday | NSCalendarUnitDay) fromDate:self.currentDate];
+            }
+            break;
+        }
+    }
     
-    // In taskdata, add properties for date/component in order to keep track every day, therefore I can limit entering
-    // into this switch to the first time of the day. This will also allow me to update daily time needed
+    if (([task.currentComponents day]!= [self.currentComponents day]))
+    {
+        task.dailyRemainingDuration = (task.remainingDuration / task.daysRemaining);
+        task.stackingTime = 0;
+        task.resumeFromValue = 0;
+        task.currentComponents = self.currentComponents;
+    }
+    
+    cell.nameText.text = task.taskDataName;
+    NSString *percentRemaining = [NSString stringWithFormat:@"%.0f%%", (100 - (task.remainingDuration/task.taskDataTime * 100))];
     
     // Check to see if new day/week/month has begun, reset everything and set new start date/components
 
     [cell.playButton addTarget:self action:@selector(playButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
     cell.playButton.tag = indexPath.row;
+    
+    if (!task.remainingDuration)
+    {
+        percentRemaining = [NSString stringWithFormat:@"0%%"];
+    }
+    [cell.playButton setTitle:percentRemaining forState:UIControlStateNormal];
+    
+    if (task.isGoodHabit)
+    {
+        [cell.playButton setTitleColor:[UIColor colorWithRed:.29804 green:.8510 blue:.3922 alpha:1] forState:UIControlStateNormal];
+    }
+    else
+    {
+        [cell.playButton setTitleColor:[UIColor colorWithRed:1 green:(59/255) blue:(48/255) alpha:1] forState:UIControlStateNormal];
+    }
     return cell;
 }
 
@@ -544,6 +658,10 @@
             
         }
         TaskData *taskRemove = self.tasks[indexPath.row];
+        if([taskRemove.taskDataName isEqualToString:self.title])
+        {
+            self.title = nil;
+        }
         [[TaskStore sharedStore] deleteTask:taskRemove];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
         if (indexPath.row == self.topCircle.buttonTag)
