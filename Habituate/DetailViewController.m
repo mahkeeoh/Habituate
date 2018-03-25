@@ -48,20 +48,6 @@
     }
 }
 
-
-//- (void)viewWillAppear:(BOOL)animated
-//{
-//    [super viewWillAppear:animated];
-//    [[self navigationController] setNavigationBarHidden:NO animated:YES];
-//}
-//- (void)viewWillDisappear:(BOOL)animated
-//{
-//    [super viewWillDisappear:animated];
-//    [[self navigationController] setNavigationBarHidden:YES animated:YES];
-//}
-
-
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -168,7 +154,6 @@
     
     
     self.xAxis.granularity = 1.0;
-    //self.xAxis.decimals = 0;
     self.xAxis.valueFormatter = self;
     [self.xAxis setLabelPosition:XAxisLabelPositionBottom];
 
@@ -261,8 +246,6 @@
         [set1 setHighlightColor:[UIColor whiteColor]];
         [set1 setDrawFilledEnabled:YES];
         
-        
-        
         // Set gradient fade below graph
         NSArray *gradientColors = @[
                                     (id)[ChartColorTemplates colorFromString:@"#00ffffff"].CGColor,
@@ -276,9 +259,6 @@
 
         LineChartData *data = [[LineChartData alloc]initWithDataSet:set1];
         [data setValueTextColor:[UIColor whiteColor]];
-       // NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-       // formatter.maximumFractionDigits = 1;
-      //  [data setValueFormatter:formatter];
         self.lineChart.data = data;
     }
     else
