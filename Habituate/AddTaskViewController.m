@@ -36,12 +36,6 @@
 
 @implementation AddTaskViewController
 
-//- (void)viewWillAppear:(BOOL)animated
-//{
-//    [super viewWillAppear:animated];
-//    [[self navigationController] setNavigationBarHidden:NO animated:YES];
-//}
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -55,41 +49,6 @@
     }
     self.timeArray = @[ @"minute(s)", @"hour(s)"];
     self.dayArray = @[ @"per day", @"per week", @"per month"];
-    
-    //CGFloat width = [UIScreen mainScreen].bounds.size.width;
-    //CGRect pickerRect = CGRectMake(0, 230, width, 216);
-    //self.dateTimePicker = [[UIPickerView alloc]initWithFrame:pickerRect];
-    // self.dateTimePicker.backgroundColor = [UIColor whiteColor];
-    
-    /*  NSLayoutConstraint *topConstraint = [NSLayoutConstraint
-     constraintWithItem:self.dateTimePicker
-     attribute:NSLayoutAttributeTop
-     relatedBy:NSLayoutRelationEqual
-     toItem:self.limitButton
-     attribute:NSLayoutAttributeBottom
-     multiplier:1.0
-     constant:8];
-     
-     NSLayoutConstraint *leftConstraint =[NSLayoutConstraint constraintWithItem:self.dateTimePicker
-     attribute:NSLayoutAttributeTrailing
-     relatedBy:NSLayoutRelationEqual
-     toItem:self.view
-     attribute:NSLayoutAttributeRightMargin
-     multiplier:1
-     constant:0];
-     
-     NSLayoutConstraint *rightConstraint =[NSLayoutConstraint constraintWithItem:self.dateTimePicker
-     attribute:NSLayoutAttributeLeading
-     relatedBy:NSLayoutRelationEqual
-     toItem:self.view
-     attribute:NSLayoutAttributeLeftMargin
-     multiplier:1
-     constant:0];
-     
-     [self.view addConstraint:topConstraint];
-     [self.view addConstraint:leftConstraint];
-     [self.view addConstraint:rightConstraint];*/
-    // [self.view addSubview:self.dateTimePicker];
     [self.dateTimePicker setDataSource:self];
     [self.dateTimePicker setDelegate:self];
     
@@ -119,11 +78,7 @@
     [self.limitButton addGestureRecognizer:tap];
     [self.dateTimePicker addGestureRecognizer:tap];
     
-    
-    
-    //self.taskInformation.text = @"Daily goals reset every day.";
-    
-    //[self.taskType addTarget:self action:@selector(valueChange) forControlEvents:UIControlEventValueChanged];
+
 }
 
 - (void)didReceiveMemoryWarning
@@ -305,22 +260,5 @@
         self.navigationItem.rightBarButtonItem.enabled = NO;
     }
 }
-
-/*- (void)valueChange
- {
- 
- if (self.taskType.selectedSegmentIndex == 0)
- {
- self.taskInformation.text = @"Daily goals reset every day.";
- }
- else if (self.taskType.selectedSegmentIndex == 1)
- {
- self.taskInformation.text = @"Resets every Sunday. New tasks created midweek automatically account for previous days of the week";
- }
- else
- {
- self.taskInformation.text = @"Resets on the first of the month. New tasks created mid-month automatically account for previous days of the month";
- }
- }*/
 
 @end

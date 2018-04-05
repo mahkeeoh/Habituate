@@ -395,7 +395,7 @@
 				DEVELOPMENT_TEAM = 2YZ54TVF57;
 				INFOPLIST_FILE = Habituate/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = Habituate.Habituate;
+				PRODUCT_BUNDLE_IDENTIFIER = com.habituate.habituate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -409,7 +409,7 @@
 				DEVELOPMENT_TEAM = 2YZ54TVF57;
 				INFOPLIST_FILE = Habituate/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = Habituate.Habituate;
+				PRODUCT_BUNDLE_IDENTIFIER = com.habituate.habituate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
