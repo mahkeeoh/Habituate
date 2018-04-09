@@ -9,6 +9,10 @@ Tracks time spent on activities to analyze good/bad habits
 
 <p>
 </p>
+<p>
+</p>
+<p>
+</p>
 
 
 <p align="center">
