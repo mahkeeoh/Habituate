@@ -9,6 +9,7 @@ Tracks time spent on activities to analyze good/bad habits
 
 <p>
 </p>
+Graphical view of habits being tracked.
 <p>
 </p>
 <p>
