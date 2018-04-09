@@ -1,4 +1,4 @@
-## Habituate
+# Habituate
 With Habituate, anyone can be more successful by forming good habits and breaking bad ones. 
 Easily track personal goals that you want to spen time on like work, study, or exercise and limit things like watching TV. 
 
@@ -19,7 +19,7 @@ Easily track personal goals that you want to spen time on like work, study, or e
   <img width="281.25" height="500" src="https://github.com/mahkeeoh/Habituate/blob/master/Habituate/Assets.xcassets/Screenshot%20Graph.imageset/Screenshot%20Graph.png">
 </p>
 
-# Who's it for?
+## Who's it for?
 
 Habituate is perfect for freelancers, independent learners, students, and anyone who wants to improve
 their habits and make better use of their time. 
